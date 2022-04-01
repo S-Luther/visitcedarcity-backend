@@ -177,3 +177,175 @@ export const pubsubtest = functions
 
 
 });
+
+// [
+//     {
+//       id: 1,
+//       title: "Vermillion Castle",
+//       subtitle: "Brian Head Area Trails",
+//       url: "https://visitcedarcity.com/things-to-do/outdoor-activities/outdoor-activities/",
+//       description: "2 mile, Out-and-Back type trail accessible Late Spring though Fall.",
+//       image: "https://www.visitbrianhead.org/File/1fb8638d-3e2b-48b1-93d1-5b48ded737ac",
+//       categories: [
+//         AttractionCategories.Experiences.subcategories.LoveLocalCedarCity,
+//       ],
+//     },
+// ]
+
+export const experiences = functions
+    .runWith({ timeoutSeconds: 60, memory: "1GB" })
+    .pubsub
+    .schedule('every 3 hours').onRun(async context => {  
+
+        functions.logger.info("Hello logs!", {structuredData: true});
+
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+        const page = await browser.newPage();
+        await page.goto('https://visitcedarcity.com/blog/#blog-posts')
+        await page.waitFor(5000);
+
+        // const Cedar = await page.$("#GridInterstates_ctl00__19");
+        // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
+
+        let returnable = "["
+        let id = 90;
+
+        const elHandleArray = await page.$$('.blog-indiv')
+
+        await elHandleArray.map(async el => {
+            const LongValText = await page.evaluate(element => element.innerHTML, el); 
+            const data = LongValText.split('"')
+            const title = data[8].split("</h2>")[0].slice(23)
+            const url = data[1]
+            const image = "https://visitcedarcity.com/"+data[5].split("&quot;")[1]
+
+
+            id++;
+            returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \"Looking for an idea of what to do in Cedar City?\",\"image\": \""+image+"\",       \"categories\": [] },"
+            // LongValText
+
+            // functions.logger.info(returnable, {structuredData: true});
+            if(id>93){
+                await admin.firestore().collection('Experiences').doc("current").update({
+                    current: returnable,
+                })
+            }
+
+        })
+    
+    
+    
+        
+        await browser.close();
+
+
+
+});
+
+export const foodsanddrinks = functions
+    .runWith({ timeoutSeconds: 60, memory: "1GB" })
+    .pubsub
+    .schedule('every 3 hours').onRun(async context => {  
+
+        functions.logger.info("Hello logs!", {structuredData: true});
+
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+        const page = await browser.newPage();
+        await page.goto('https://visitcedarcity.com/food-drink/')
+        await page.waitFor(5000);
+
+        // const Cedar = await page.$("#GridInterstates_ctl00__19");
+        // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
+
+        let returnable = "["
+        let id = 100;
+
+        const elHandleArray = await page.$$('.listing-container')
+
+        await elHandleArray.map(async el => {
+            const LongValText = await page.evaluate(element => element.innerHTML, el); 
+            if(!LongValText.includes("Fast Food")){
+                const data = LongValText.split('"')
+                let title = data[8].split("</h4>")[0].slice(5)
+                if(title.includes("&amp;"))
+                    title = title.replace("&amp;","&")
+                const url = data[21]
+                const image = data[3].split("&quot;")[1]
+
+
+                id++;
+                returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Food and Drinks\",\"url\": \""+url+"\",\"description\": \"Try Cedar City's Food and drink.\",\"image\": \""+image+"\",       \"categories\": [] },"
+                // LongValText
+
+                // functions.logger.info(returnable, {structuredData: true});
+                if(id>104){
+                    await admin.firestore().collection('Foodsanddrinks').doc("current").update({
+                        current: returnable,
+                    })
+                }
+            }
+
+        })
+    
+    
+    
+        
+        await browser.close();
+
+
+
+});
+
+export const lodging = functions
+    .runWith({ timeoutSeconds: 20, memory: "1GB" })
+    .pubsub
+    .schedule('every 3 hours').onRun(async context => {  
+
+        // functions.logger.info("Hello logs!", {structuredData: true});
+
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+        const page = await browser.newPage();
+        await page.goto('https://visitcedarcity.com/lodging/')
+        await page.waitFor(5000);
+
+        // const Cedar = await page.$("#GridInterstates_ctl00__19");
+        // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
+
+        let returnable = "["
+        let id = 200;
+
+        const elHandleArray = await page.$$('.listing-container')
+
+        await elHandleArray.map(async el => {
+            const LongValText = await page.evaluate(element => element.innerHTML, el); 
+            // if(!LongValText.includes("Fast Food")){
+                const data = LongValText.split('"')
+                let title = data[8].split("</h4>")[0].slice(5)
+                if(title.includes("&amp;"))
+                    title = title.replace("&amp;","&")
+                const url = data[21]
+                const image = data[3].split("&quot;")[1]
+
+
+                id++;
+                returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Lodging\",\"url\": \""+url+"\",\"description\": \"Best Places to stay in Cedar City.\",\"image\": \""+image+"\",       \"categories\": [] },"
+                // LongValText
+
+                functions.logger.info(returnable, {structuredData: true});
+                if(id>203){
+                    await admin.firestore().collection('Lodgings').doc("current").update({
+                        current: returnable,
+                    })
+                }
+            // }
+
+        })
+    
+    
+    
+        
+        await browser.close();
+
+
+
+});
