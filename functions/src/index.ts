@@ -208,7 +208,7 @@ export const experiences = functions
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
 
         let returnable = "["
-        let id = 90;
+        let id = 98790;
 
         const elHandleArray = await page.$$('.blog-indiv')
 
@@ -224,12 +224,41 @@ export const experiences = functions
             returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \"Looking for an idea of what to do in Cedar City?\",\"image\": \""+image+"\",       \"categories\": [] },"
             // LongValText
 
+
+
+        })
+
+        await page.goto('https://visitcedarcity.com/')
+        await page.waitFor(5000);
+
+
+        const instHandleArray = await page.$$('.sbi_photo_wrap')
+
+        await instHandleArray.map(async el => {
+            const LongValText = await page.evaluate(element => element.innerHTML, el); 
+            const data = LongValText.split('"')
+
+            functions.logger.info(data, {structuredData: true});
+            const title = "Connect with us"
+            const url = data[3]
+            const image = data[9]
+            let test = data[19].replace(/(\r\n|\n|\r)/gm, "")
+            
+
+            if(test === "true" || test === true){
+                test = data[41].replace(/(\r\n|\n|\r)/gm, "")
+            }
+
+            functions.logger.info(test, {structuredData: true});
+            id++;
+            returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \""+test+"\",\"image\": \""+image+"\",       \"categories\": [] },"
+            // LongValText
+
             // functions.logger.info(returnable, {structuredData: true});
-            if(id>93){
                 await admin.firestore().collection('Experiences').doc("current").update({
                     current: returnable,
                 })
-            }
+            
 
         })
     
@@ -258,7 +287,7 @@ export const foodsanddrinks = functions
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
 
         let returnable = "["
-        let id = 100;
+        let id = 243098100;
 
         const elHandleArray = await page.$$('.listing-container')
 
