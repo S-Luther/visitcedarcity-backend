@@ -2,9 +2,10 @@ var UserD = "";
 /**
 * Function called when clicking the Login/Logout button.
 */
-var filterReturnable, biasReturnable, db
+var filterReturnable, biasReturnable, db, attractionsReturnable = {schedule: []}
 const biaslist = document.querySelector('#biaslist');
 const filterlist = document.querySelector('#filterlist');
+const attractionlist = document.querySelector('#attractionlist');
 function toggleSignIn() {
     if (!firebase.auth().currentUser) {
         var provider = new firebase.auth.GoogleAuthProvider();
@@ -73,6 +74,19 @@ function removeFilter(str){
         current: JSON.stringify(filterReturnable),
     });
 }
+function removeAttraction(str){
+    var index = 0
+
+    attractionsReturnable.schedule.forEach(el =>{
+        if(str === el.id.toString()){
+            attractionsReturnable.schedule.splice(index, 1);
+        }
+        index++
+    })
+    db.collection('Custom').doc('current').update({
+        current: JSON.stringify(attractionsReturnable),
+    });
+}
 
 function initApp() {
 
@@ -104,6 +118,20 @@ function initApp() {
                 filterReturnable.forEach(el => {
                     filterlist.innerHTML = filterlist.innerHTML + '<li><button onClick="removeFilter(\''+el+'\')" class="icon fa-close">'+el+'<span class="label">delete</span></button></li>'
     
+                })
+            })
+    
+        });
+        db.collection('Custom').onSnapshot(snapshot => {
+            //     let changes = snapshot
+            let changes = snapshot.docChanges();
+            changes.forEach(change => {
+    
+                console.log(change.doc.data().current);
+                attractionsReturnable = JSON.parse(change.doc.data().current)
+                attractionlist.innerHTML = ""
+                attractionsReturnable.schedule.forEach(el => {
+                    attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
                 })
             })
     
@@ -141,6 +169,21 @@ function initApp() {
             filterReturnable.forEach(el => {
                 filterlist.innerHTML = filterlist.innerHTML + '<li><button onClick="removeFilter(\''+el+'\')" class="icon fa-close">'+el+'<span class="label">delete</span></button></li>'
 
+            })
+        })
+
+    });
+
+    db.collection('Custom').onSnapshot(snapshot => {
+        //     let changes = snapshot
+        let changes = snapshot.docChanges();
+        changes.forEach(change => {
+
+            console.log(change.doc.data().current);
+            attractionsReturnable = JSON.parse(change.doc.data().current)
+            attractionlist.innerHTML = ""
+            attractionsReturnable.schedule.forEach(el => {
+                attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
             })
         })
 
@@ -236,12 +279,13 @@ window.onload = function() {
 
 const bias = document.querySelector('#bias')
 const filter = document.querySelector('#filter')
+const attractions = document.querySelector('#attractions')
 
 
 
 
 // var filterReturnable = db.collection('Filters').doc('current').current
-
+var id = 8374568345383847
 
 bias.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -263,4 +307,38 @@ filter.addEventListener('submit', (e) => {
     });
    
     filter.filterin.value = '';
+});
+attractions.addEventListener('submit', (e) => {
+    e.preventDefault();
+    console.log(attractions)
+	console.log(attractions.subtitle)
+    console.log(attractions.subtitle.value)
+
+    id++
+    var temp =   {
+        id: id,
+        title: attractions.title.value,
+        subtitle: attractions.subtitle.value,
+        url: attractions.url.value,
+        description: attractions.description.value,
+        image: attractions.img.value,
+        categories: [],    
+        coordinates: {
+          lat: attractions.lat.value, 
+          lng: attractions.lng.value,
+        },
+      }
+      attractionsReturnable.schedule.push(temp)
+      console.log(attractionsReturnable)
+    db.collection('Custom').doc('current').update({
+        current: JSON.stringify(attractionsReturnable),
+    });
+   
+    attractions.title.value = '';
+    attractions.subtitle.value = '';
+    attractions.url.value = '';
+    attractions.description.value = '';
+    attractions.img.value = '';
+    attractions.lat.value = '';
+    attractions.lng.value = '';
 });
