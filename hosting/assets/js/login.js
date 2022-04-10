@@ -2,7 +2,7 @@ var UserD = "";
 /**
 * Function called when clicking the Login/Logout button.
 */
-var filterReturnable, biasReturnable, db, attractionsReturnable = {schedule: []}
+var filterReturnable, biasReturnable, db, attractionsReturnable = []
 const biaslist = document.querySelector('#biaslist');
 const filterlist = document.querySelector('#filterlist');
 const attractionlist = document.querySelector('#attractionlist');
@@ -77,9 +77,9 @@ function removeFilter(str){
 function removeAttraction(str){
     var index = 0
 
-    attractionsReturnable.schedule.forEach(el =>{
+    attractionsReturnable.forEach(el =>{
         if(str === el.id.toString()){
-            attractionsReturnable.schedule.splice(index, 1);
+            attractionsReturnable.splice(index, 1);
         }
         index++
     })
@@ -130,7 +130,7 @@ function initApp() {
                 console.log(change.doc.data().current);
                 attractionsReturnable = JSON.parse(change.doc.data().current)
                 attractionlist.innerHTML = ""
-                attractionsReturnable.schedule.forEach(el => {
+                attractionsReturnable.forEach(el => {
                     attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
                 })
             })
@@ -182,7 +182,7 @@ function initApp() {
             console.log(change.doc.data().current);
             attractionsReturnable = JSON.parse(change.doc.data().current)
             attractionlist.innerHTML = ""
-            attractionsReturnable.schedule.forEach(el => {
+            attractionsReturnable.forEach(el => {
                 attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
             })
         })
@@ -328,7 +328,7 @@ attractions.addEventListener('submit', (e) => {
           lng: attractions.lng.value,
         },
       }
-      attractionsReturnable.schedule.push(temp)
+      attractionsReturnable.push(temp)
       console.log(attractionsReturnable)
     db.collection('Custom').doc('current').update({
         current: JSON.stringify(attractionsReturnable),
