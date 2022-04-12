@@ -76,16 +76,19 @@ function removeFilter(str){
 }
 function removeAttraction(str){
     var index = 0
-
-    attractionsReturnable.forEach(el =>{
-        if(str === el.id.toString()){
-            attractionsReturnable.splice(index, 1);
-        }
-        index++
-    })
-    db.collection('Custom').doc('current').update({
-        current: JSON.stringify(attractionsReturnable),
-    });
+    if (confirm("Are you sure?") == true) {
+        console.log("You pressed OK!");
+    
+        attractionsReturnable.forEach(el =>{
+            if(str === el.id.toString()){
+                attractionsReturnable.splice(index, 1);
+            }
+            index++
+        })
+        db.collection('Custom').doc('current').update({
+            current: JSON.stringify(attractionsReturnable),
+        });
+    }
 }
 
 function initApp() {
@@ -314,7 +317,7 @@ attractions.addEventListener('submit', (e) => {
 	console.log(attractions.subtitle)
     console.log(attractions.subtitle.value)
 
-    id++
+    id = id + Math.floor(Math.random() * 100000000);
     var temp =   {
         id: id,
         title: attractions.title.value,
