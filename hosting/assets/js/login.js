@@ -2,7 +2,7 @@ var UserD = "";
 /**
 * Function called when clicking the Login/Logout button.
 */
-var filterReturnable, biasReturnable, db, attractionsReturnable = []
+var filterReturnable, biasReturnable, db, attractionsReturnable = [], toggleReturnable = [true,true,true,true,true,true,true]
 const biaslist = document.querySelector('#biaslist');
 const filterlist = document.querySelector('#filterlist');
 const attractionlist = document.querySelector('#attractionlist');
@@ -139,6 +139,21 @@ function initApp() {
             })
     
         });
+        db.collection('Toggler').onSnapshot(snapshot => {
+            //     let changes = snapshot
+            let changes = snapshot.docChanges();
+            changes.forEach(change => {
+    
+                console.log(change.doc.data().current);
+                toggleReturnable = JSON.parse(change.doc.data().current)
+                var index = 0;
+                toggleReturnable.forEach(el => {
+                    document.getElementById(index.toString()).checked = toggleReturnable[index];
+                    index++;
+                })
+            })
+    
+        });
     }
     
     firebase.auth().getRedirectResult().then(function(result) {
@@ -187,6 +202,21 @@ function initApp() {
             attractionlist.innerHTML = ""
             attractionsReturnable.forEach(el => {
                 attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
+            })
+        })
+
+    });
+    db.collection('Toggler').onSnapshot(snapshot => {
+        //     let changes = snapshot
+        let changes = snapshot.docChanges();
+        changes.forEach(change => {
+
+            console.log(change.doc.data().current);
+            toggleReturnable = JSON.parse(change.doc.data().current)
+            var index = 0;
+            toggleReturnable.forEach(el => {
+                document.getElementById(index.toString()).checked = toggleReturnable[index];
+                index++;
             })
         })
 
@@ -284,7 +314,23 @@ const bias = document.querySelector('#bias')
 const filter = document.querySelector('#filter')
 const attractions = document.querySelector('#attractions')
 
+filter.addEventListener('submit', (e) => {
+    e.preventDefault();
+	console.log(e)
+	filterReturnable.push(filter.filterin.value)
+    db.collection('Filters').doc('current').update({
+        current: JSON.stringify(filterReturnable),
+    });
+   
+    filter.filterin.value = '';
+});
 
+function toggleComp(i){
+    toggleReturnable[i] = !toggleReturnable[i]
+    db.collection('Toggler').doc('current').update({
+        current: JSON.stringify(toggleReturnable),
+    });
+}
 
 
 // var filterReturnable = db.collection('Filters').doc('current').current

@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <link rel="stylesheet" href="assets/css/main.css" />
+
+</head>
+<body>
+    <style>
+        *{
+            margin: auto;
+            text-align: center;
+            font-size: xx-large;
+        }
+        #content{
+            margin-top: 45vh;
+        }
+    </style>
+    <div id="content">Loading, Please Wait....</div>
+    
+    <script>
+        function getMobileOperatingSystem() {
+            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            if (/android/i.test(userAgent)) {
+                document.location.href = "https://play.google.com/store/apps/details?id=us.goldblockchain.cedarcity"
+            }
+
+            // iOS detection from: http://stackoverflow.com/a/9039885/177710
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                document.location.href = "https://apps.apple.com/us/app/visit-cedar-city-brian-head/id1615825019"
+            }
+
+            document.getElementById("content").innerHTML = '    <button href="https://play.google.com/store/apps/details?id=us.goldblockchain.cedarcity">Download Android App</button><br/><br/><br/><button href="https://apps.apple.com/us/app/visit-cedar-city-brian-head/id1615825019">Download Apple App</button>'
+        }
+            getMobileOperatingSystem()
+        
+    </script>
+
+</body>
+</html>
