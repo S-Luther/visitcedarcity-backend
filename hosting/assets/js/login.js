@@ -220,7 +220,7 @@ function initApp() {
                 attractionsReturnable = JSON.parse(change.doc.data().current)
                 attractionlist.innerHTML = ""
                 attractionsReturnable.forEach(el => {
-                    attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\',\''+el.title+'\',\''+el.subtitle+'\',\''+el.description+'\',\''+el.url+'\',\''+el.image+'\',\''+el.coordinates.lat+'\',\''+el.coordinates.lng+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
+                    attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\',\''+el.title+'\',\''+el.subtitle+'\',\''+el.description.replaceAll("'", "`")+'\',\''+el.url+'\',\''+el.image+'\',\''+el.coordinates.lat+'\',\''+el.coordinates.lng+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
                 })
             })
     
@@ -342,7 +342,7 @@ function initApp() {
             attractionsReturnable = JSON.parse(change.doc.data().current)
             attractionlist.innerHTML = ""
             attractionsReturnable.forEach(el => {
-                attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\',\''+el.title+'\',\''+el.subtitle+'\',\''+el.description+'\',\''+el.url+'\',\''+el.image+'\',\''+el.coordinates.lat+'\',\''+el.coordinates.lng+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
+                attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\',\''+el.title+'\',\''+el.subtitle+'\',\''+el.description.replaceAll("'", "`")+'\',\''+el.url+'\',\''+el.image+'\',\''+el.coordinates.lat+'\',\''+el.coordinates.lng+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
             })
         })
 
