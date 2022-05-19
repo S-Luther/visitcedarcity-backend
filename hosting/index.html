@@ -39,6 +39,7 @@
 										<li><a href="#filters" class="button">Filters</a></li>
 										<li><a href="#attraction" class="button">Custom Attractions</a></li>
 										<li><a href="#component" class="button">Components</a></li>
+										<li><a href="#schedules" class="button">Schedules</a></li>
 										<li><a href="https://console.firebase.google.com/u/0/project/visitcedarcity-backend/messaging" class="button">Push Notifications</a></li>
 										<!--<li><a href="#elements" class="button">Elements</a></li>-->
 									</ul>
@@ -59,9 +60,7 @@
 
 				<!-- Work -->
 					<article id="biases" class="panel secondary">
-						<div class="image">
-							<img src="images/icon.png" alt="" data-position="center center" />
-						</div>
+
 						<div class="content">
 							<ul class="actions spinX">
 								<li><a href="#home" class="button small back">Back</a></li>
@@ -96,14 +95,14 @@
 								</header>
 								<ul class="" style="list-style: none;" id="toggleList">
 									<li>
-										<p>Weather</p>
+										<p style="margin-bottom: 0px;">Weather</p>
 										<label class="switch">
 											<input onchange="toggleComp(0)" type="checkbox" id="0">
 											<span class="slider round"></span>
 										</label>
 									</li>
 									<li>
-										<p>Schedule</p>
+										<p style="margin-bottom: 0px;">Schedule</p>
 										<label class="switch">
 											
 											<input onchange="toggleComp(1)" type="checkbox" id="1">
@@ -111,7 +110,7 @@
 										</label>
 									</li>
 									<li>
-										<p>Festival Food</p>
+										<p style="margin-bottom: 0px;">Festival Food</p>
 										<label class="switch">
 											
 											<input onchange="toggleComp(2)" type="checkbox" id="2">
@@ -119,7 +118,7 @@
 										</label>
 									</li>
 									<li>
-										<p>Sky Data</p>
+										<p style="margin-bottom: 0px;">Sky Data</p>
 										<label class="switch">
 											
 											<input onchange="toggleComp(3)" type="checkbox" id="3">
@@ -127,7 +126,7 @@
 										</label>
 									</li>
 									<li>
-										<p>Road Conditions</p>
+										<p style="margin-bottom: 0px;">Road Conditions</p>
 										<label class="switch">
 											
 											<input onchange="toggleComp(4)" type="checkbox" id="4">
@@ -135,7 +134,7 @@
 										</label>
 									</li>
 									<li>
-										<p>Winter Mountain Data</p>
+										<p style="margin-bottom: 0px;">Brian Head Mountain Data</p>
 										<label class="switch">
 											
 											<input onchange="toggleComp(5)" type="checkbox" id="5">
@@ -143,7 +142,7 @@
 										</label>
 									</li>
 									<li>
-										<p>Snow Pack</p>
+										<p style="margin-bottom: 0px;">Snow Pack</p>
 										<label class="switch">
 											
 											<input onchange="toggleComp(6)" type="checkbox" id="6">
@@ -156,9 +155,7 @@
 					</article>
 				<!-- Contact -->
 					<article id="filters" class="panel secondary">
-						<div class="image">
-							<img src="images/icon.png" alt="" data-position="bottom center" />
-						</div>
+
 						<div class="content">
 							<ul class="actions spinX">
 								<li><a href="#home" class="button small back">Back</a></li>
@@ -175,6 +172,37 @@
 								</form>
 								<br/>
 								<ul class="actions" id="filterlist">
+									
+								</ul>
+							</div>
+						</div>
+					</article>	
+					<!-- Contact -->
+					<article id="schedules" class="panel secondary">
+
+						<div class="content">
+							<ul class="actions spinX">
+								<li><a href="#home" class="button small back">Back</a></li>
+							</ul>
+							<div class="inner">
+								<header>
+									<h2>Edit Schedules</h2>
+									<p>View the Schedule entirely and remove or add events.</p>
+								</header>
+								<label for="name">Search for Event</label>
+								<form id="schedule">
+									<input type="text" name="schedules" id="schedulein" />
+									<!-- <input type="submit" value="Add" class="special" /> -->
+								</form>
+								<br/>
+								<h3>Current Filters </h3>
+								<p>(Filters Won't apply instantly and may need a page refresh to take effect in the schedule below)</p>
+								<ul class="actions" id="schedulefilterlist">
+								</ul>
+								<br/>
+								<hr>
+								<h3>Current Schedule (Not Complete)</h3>
+								<ul class="alt" id="schedulelist">
 									
 								</ul>
 							</div>
@@ -213,6 +241,7 @@
 									<input type="text" name="lng" id="lng" />
 									<br/>
 									<input style="margin: auto;" type="submit" value="Add" class="special" />
+									<input style="margin: auto;background-color: crimson;" type="reset" value="Clear" class="special" />
 								</form>
 								<br/>
 
@@ -249,7 +278,7 @@
 		box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 	}
 								</style>
-								<p>click card to delete<br/></p>
+								<p>click card to delete / edit<br/></p>
 								<ul class="actions" id="attractionlist">
 									<li>
 										<div class="card icon fa-close">
