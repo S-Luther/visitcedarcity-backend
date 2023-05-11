@@ -295,19 +295,21 @@ export const foodsanddrinks = functions
             const LongValText = await page.evaluate(element => element.innerHTML, el); 
             if(!LongValText.includes("Fast Food")){
                 const data = LongValText.split('"')
+                const address = data[9];
                 let title = data[8].split("</h4>")[0].slice(5)
                 if(title.includes("&amp;"))
                     title = title.replace("&amp;","&")
                 const url = data[21]
                 const image = data[3].split("&quot;")[1]
+                
 
 
                 id++;
-                returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Food and Drinks\",\"url\": \""+url+"\",\"description\": \"Try Cedar City's Food and drink.\",\"image\": \""+image+"\",       \"categories\": [] },"
+                returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Food and Drinks\",\"url\": \""+url+"\",\"description\": \"Try Cedar City's Food and drink.\",\"image\": \""+image+"\", \"address\": \""+address+"\",      \"categories\": [] },"
                 // LongValText
 
                 // functions.logger.info(returnable, {structuredData: true});
-                if(id>104){
+                if(id>243098104){
                     await admin.firestore().collection('Foodsanddrinks').doc("current").update({
                         current: returnable,
                     })
@@ -350,6 +352,8 @@ export const lodging = functions
             // if(!LongValText.includes("Fast Food")){
                 const data = LongValText.split('"')
                 let title = data[8].split("</h4>")[0].slice(5)
+                const address = data[9];
+
                 if(title.includes("&amp;"))
                     title = title.replace("&amp;","&")
                 const url = data[21]
@@ -357,7 +361,7 @@ export const lodging = functions
 
 
                 id++;
-                returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Lodging\",\"url\": \""+url+"\",\"description\": \"Best Places to stay in Cedar City.\",\"image\": \""+image+"\",       \"categories\": [] },"
+                returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Lodging\",\"url\": \""+url+"\",\"description\": \"Best Places to stay in Cedar City.\",\"image\": \""+image+"\", \"address\": \""+address+"\",      \"categories\": [] },"
                 // LongValText
 
                 functions.logger.info(returnable, {structuredData: true});

@@ -372,6 +372,7 @@ attractions.addEventListener('submit', (e) => {
         description: attractions.description.value,
         image: attractions.img.value,
         categories: [],    
+        address: attractions.add.value,
         coordinates: {
           lat: attractions.lat.value, 
           lng: attractions.lng.value,
