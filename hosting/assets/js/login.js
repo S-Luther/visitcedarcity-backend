@@ -2,9 +2,14 @@ var UserD = "";
 /**
 * Function called when clicking the Login/Logout button.
 */
-var filterReturnable, biasReturnable, db, attractionsReturnable = [], toggleReturnable = [true,true,true,true,true,true,true]
+var filterReturnable,schedulefilterReturnable, biasReturnable, db, attractionsReturnable = [], toggleReturnable = [true,true,true,true,true,true,true]
 const biaslist = document.querySelector('#biaslist');
 const filterlist = document.querySelector('#filterlist');
+const schedulelist = document.querySelector('#schedulelist');
+const schedulefilterlist = document.querySelector('#schedulefilterlist');
+
+let schedulefilters = [];
+
 const attractionlist = document.querySelector('#attractionlist');
 function toggleSignIn() {
     if (!firebase.auth().currentUser) {
@@ -22,12 +27,12 @@ function toggleSignIn() {
 var modal = document.getElementById("authModal");
 
 var span = document.getElementsByClassName("close")[0];
-
+var spaces = " "
 /**
 *  writes user info to the database
 *  called from within initApp funtion for when a user logs in
 */
-admins = ["samluther998@gmail.com"]
+admins = ["samluther998@gmail.com", "abennett@ironcounty.net", "mtwitchell@ironcounty.net", "wihler@ironcounty.net", "tourism.comm@ironcounty.net","bernardkintzing@gmail.com","info@goldblockchain.us"]
 // function writeUserData(userId, name, email, imageUrl) {
 //     var userRef = firebase.database().ref('users/');
     
@@ -35,7 +40,7 @@ admins = ["samluther998@gmail.com"]
     
 //     userRef.orderByChild("id").equalTo(userId).on("value", function(data) {
 //         if(!data.exists()){
-//             // console.log("do it");
+//             // //console.log("do it");
 //                 firebase.database().ref('users/' + userId).set({
 //                     username: name,
 //                     id: userId,
@@ -74,10 +79,26 @@ function removeFilter(str){
         current: JSON.stringify(filterReturnable),
     });
 }
-function removeAttraction(str){
+function removeScheduleFilter(str){
+    var index = schedulefilterReturnable.indexOf(str)
+    schedulefilterReturnable.splice(index, 1);
+    db.collection('ScheduleFilters').doc('current').update({
+        current: JSON.stringify(schedulefilterReturnable),
+    });
+
+}
+function addScheduleFilter(str){
+
+    schedulefilterReturnable.push(str)
+    db.collection('ScheduleFilters').doc('current').update({
+        current: JSON.stringify(schedulefilterReturnable),
+    });
+    
+}
+function removeAttraction(str, title, subtitle, description, url, image, lat, lng){
     var index = 0
     if (confirm("Are you sure?") == true) {
-        console.log("You pressed OK!");
+        //console.log("You pressed OK!");
     
         attractionsReturnable.forEach(el =>{
             if(str === el.id.toString()){
@@ -88,12 +109,20 @@ function removeAttraction(str){
         db.collection('Custom').doc('current').update({
             current: JSON.stringify(attractionsReturnable),
         });
+        attractions.title.value = title;
+        attractions.subtitle.value = subtitle;
+        attractions.url.value = url;
+        attractions.description.value = description;
+        attractions.img.value = image;
+        attractions.lat.value = lat;
+        attractions.lng.value = lng;
+        document.body.scrollTop = document.documentElement.scrollTop = "100px";
     }
 }
 
 function initApp() {
 
-    if(localStorage.getItem("loggedin")){
+    if(localStorage.getItem("loggedin") && admins.includes(localStorage.getItem("current_uid"))){
         modal.style.display = "none";
         db = firebase.firestore();
         db.collection('Biases').onSnapshot(snapshot => {
@@ -101,7 +130,7 @@ function initApp() {
             let changes = snapshot.docChanges();
             changes.forEach(change => {
     
-                console.log(change.doc.data().current);
+                //console.log(change.doc.data().current);
                 biasReturnable = JSON.parse(change.doc.data().current)
                 biaslist.innerHTML = ""
                 biasReturnable.forEach(el => {
@@ -112,29 +141,86 @@ function initApp() {
         });
         db.collection('Filters').onSnapshot(snapshot => {
             //     let changes = snapshot
+
             let changes = snapshot.docChanges();
             changes.forEach(change => {
     
-                console.log(change.doc.data().current);
+                //console.log(change.doc.data().current);
                 filterReturnable = JSON.parse(change.doc.data().current)
                 filterlist.innerHTML = ""
+                
                 filterReturnable.forEach(el => {
                     filterlist.innerHTML = filterlist.innerHTML + '<li><button onClick="removeFilter(\''+el+'\')" class="icon fa-close">'+el+'<span class="label">delete</span></button></li>'
+                
     
                 })
             })
     
         });
+        db.collection('ScheduleFilters').onSnapshot(snapshot => {
+            //     let changes = snapshot
+
+            let changes = snapshot.docChanges();
+            changes.forEach(change => {
+    
+                //console.log(change.doc.data().current);
+                schedulefilterReturnable = JSON.parse(change.doc.data().current)
+                schedulefilterlist.innerHTML = ""
+                
+                schedulefilterReturnable.forEach(el => {
+                    schedulefilterlist.innerHTML = schedulefilterlist.innerHTML + '<li><button onClick="removeScheduleFilter(\''+el+'\')" class="icon fa-close">'+el+'<span class="label">delete</span></button></li>'
+    
+                })
+            })
+    
+        });
+        db.collection('Schedules').onSnapshot(snapshot => {
+            //     let changes = snapshot
+            let changes = snapshot.docChanges();
+            
+            changes.forEach(change => {
+    
+                //console.log(change.doc.data().current);
+                schedulesReturnable = JSON.parse(change.doc.data().current.slice(0,-1) + "]}")["schedule"]
+                var date = new Date();
+
+                schedulesReturnable.forEach(el => {
+                    el.groups.forEach(elem => {
+                        var thedate = new Date(el.date);
+                        if((thedate.getTime() > date.getTime()) && !schedulefilterReturnable.includes(el.date+" • "+elem.sessions[0].name)){
+                        schedulelist.innerHTML = schedulelist.innerHTML +'<li style="font-size:12px;"><div style=" ">&nbsp;&nbsp;&nbsp;&nbsp;<div class="date">'+el.date+ "</div> • " +elem.sessions[0].name+" • " +elem.sessions[0].location+'&nbsp;&nbsp;<div style="text-align:right"><button onClick="addScheduleFilter(\''+el.date+" • "+elem.sessions[0].name+'\')">Filter Out</button></div></div></li>'
+    
+                        }
+                    })
+
+
+    
+                })
+            })
+            sort('#schedulelist>li', 'div.date');
+
+            function sort(list, key) {
+                $($(list).get().reverse()).each(function(outer) {
+                    var sorting = this;
+                    $($(list).get().reverse()).each(function(inner) {
+                        if($(key, this).text().localeCompare($(key, sorting).text()) > 0) {
+                            this.parentNode.insertBefore(sorting.parentNode.removeChild(sorting), this);
+                        }
+                    });
+                });
+            }
+        });
+
         db.collection('Custom').onSnapshot(snapshot => {
             //     let changes = snapshot
             let changes = snapshot.docChanges();
             changes.forEach(change => {
     
-                console.log(change.doc.data().current);
+                //console.log(change.doc.data().current);
                 attractionsReturnable = JSON.parse(change.doc.data().current)
                 attractionlist.innerHTML = ""
                 attractionsReturnable.forEach(el => {
-                    attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
+                    attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\',\''+el.title+'\',\''+el.subtitle+'\',\''+el.description.replaceAll("'", "`")+'\',\''+el.url+'\',\''+el.image+'\',\''+el.coordinates.lat+'\',\''+el.coordinates.lng+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
                 })
             })
     
@@ -144,7 +230,7 @@ function initApp() {
             let changes = snapshot.docChanges();
             changes.forEach(change => {
     
-                console.log(change.doc.data().current);
+                //console.log(change.doc.data().current);
                 toggleReturnable = JSON.parse(change.doc.data().current)
                 var index = 0;
                 toggleReturnable.forEach(el => {
@@ -159,7 +245,7 @@ function initApp() {
     firebase.auth().getRedirectResult().then(function(result) {
     var user = result.user;
     localStorage.setItem("current_uid", user.uid);
-    console.log(user.uid);
+    //console.log(user.uid);
     localStorage.setItem("lsUser", user);
     db = firebase.firestore();
     db.collection('Biases').onSnapshot(snapshot => {
@@ -167,7 +253,7 @@ function initApp() {
         let changes = snapshot.docChanges();
         changes.forEach(change => {
 
-            console.log(change.doc.data().current);
+            //console.log(change.doc.data().current);
             biasReturnable = JSON.parse(change.doc.data().current)
             biaslist.innerHTML = ""
             biasReturnable.forEach(el => {
@@ -181,15 +267,70 @@ function initApp() {
         let changes = snapshot.docChanges();
         changes.forEach(change => {
 
-            console.log(change.doc.data().current);
+            //console.log(change.doc.data().current);
             filterReturnable = JSON.parse(change.doc.data().current)
             filterlist.innerHTML = ""
             filterReturnable.forEach(el => {
                 filterlist.innerHTML = filterlist.innerHTML + '<li><button onClick="removeFilter(\''+el+'\')" class="icon fa-close">'+el+'<span class="label">delete</span></button></li>'
 
+
             })
         })
 
+    });
+    db.collection('ScheduleFilters').onSnapshot(snapshot => {
+        //     let changes = snapshot
+
+        let changes = snapshot.docChanges();
+        changes.forEach(change => {
+
+            //console.log(change.doc.data().current);
+            schedulefilterReturnable = JSON.parse(change.doc.data().current)
+            schedulefilterlist.innerHTML = ""
+            
+            schedulefilterReturnable.forEach(el => {
+                schedulefilterlist.innerHTML = schedulefilterlist.innerHTML + '<li><button onClick="removeScheduleFilter(\''+el+'\')" class="icon fa-close">'+el+'<span class="label">delete</span></button></li>'
+
+
+            })
+        })
+
+    });
+    db.collection('Schedules').onSnapshot(snapshot => {
+        //     let changes = snapshot
+        let changes = snapshot.docChanges();
+        
+        changes.forEach(change => {
+
+            //console.log(change.doc.data().current);
+            schedulesReturnable = JSON.parse(change.doc.data().current.slice(0,-1) + "]}")["schedule"]
+            var date = new Date();
+
+            schedulesReturnable.forEach(el => {
+                el.groups.forEach(elem => {
+                    var thedate = new Date(el.date);
+                    if((thedate.getTime() > date.getTime()) && !schedulefilterReturnable.includes(el.date+" • "+elem.sessions[0].name)){
+                    schedulelist.innerHTML = schedulelist.innerHTML +'<li style="font-size:12px;"><div style=" ">&nbsp;&nbsp;&nbsp;&nbsp;<div class="date">'+el.date+ "</div> • " +elem.sessions[0].name+" • " +elem.sessions[0].location+'&nbsp;&nbsp;<div style="text-align:right"><button onClick="addScheduleFilter(\''+el.date+" • "+elem.sessions[0].name+'\')">Filter Out</button></div></div></li>'
+
+                    }
+                })
+
+
+
+            })
+        })
+        sort('#schedulelist>li', 'div.date');
+
+        function sort(list, key) {
+            $($(list).get().reverse()).each(function(outer) {
+                var sorting = this;
+                $($(list).get().reverse()).each(function(inner) {
+                    if($(key, this).text().localeCompare($(key, sorting).text()) > 0) {
+                        this.parentNode.insertBefore(sorting.parentNode.removeChild(sorting), this);
+                    }
+                });
+            });
+        }
     });
 
     db.collection('Custom').onSnapshot(snapshot => {
@@ -197,11 +338,11 @@ function initApp() {
         let changes = snapshot.docChanges();
         changes.forEach(change => {
 
-            console.log(change.doc.data().current);
+            //console.log(change.doc.data().current);
             attractionsReturnable = JSON.parse(change.doc.data().current)
             attractionlist.innerHTML = ""
             attractionsReturnable.forEach(el => {
-                attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
+                attractionlist.innerHTML = attractionlist.innerHTML + '<li><div onClick="removeAttraction(\''+el.id+'\',\''+el.title+'\',\''+el.subtitle+'\',\''+el.description.replaceAll("'", "`")+'\',\''+el.url+'\',\''+el.image+'\',\''+el.coordinates.lat+'\',\''+el.coordinates.lng+'\')" class="card icon fa-close"><img class="image noround" src="'+el.image+'"/><p class="notop">'+el.title+'</p></div></li>'
             })
         })
 
@@ -211,7 +352,7 @@ function initApp() {
         let changes = snapshot.docChanges();
         changes.forEach(change => {
 
-            console.log(change.doc.data().current);
+            //console.log(change.doc.data().current);
             toggleReturnable = JSON.parse(change.doc.data().current)
             var index = 0;
             toggleReturnable.forEach(el => {
@@ -246,7 +387,7 @@ function initApp() {
     // Listening for auth state changes.
     // [START authstatelistener]
     firebase.auth().onAuthStateChanged(function(user) {
-        if (user) {
+        if (user && admins.includes(user.email)) {
             localStorage.setItem("loggedin", true);
                 span.onclick = function() {
                     modal.style.display = "none";
@@ -262,7 +403,7 @@ function initApp() {
 
             UserD = user.uid;
             // User is signed in.
-            localStorage.setItem("current_uid", user.uid);
+            localStorage.setItem("current_uid", user.email);
             
             // writeUserData(user.uid, user.displayName, user.email, user.photoURL);
 
@@ -307,7 +448,16 @@ window.onload = function() {
 //   };
 //   firebase.initializeApp(firebaseConfig);
 
-
+jQuery("#schedulein").keyup(function () {
+    var filter = jQuery(this).val();
+    jQuery("#schedulelist>li").each(function () {
+        if (jQuery(this).text().search(new RegExp(filter, "i")) < 0) {
+            jQuery(this).hide();
+        } else {
+            jQuery(this).show()
+        }
+    });
+});
 
 
 const bias = document.querySelector('#bias')
@@ -316,7 +466,7 @@ const attractions = document.querySelector('#attractions')
 
 filter.addEventListener('submit', (e) => {
     e.preventDefault();
-	console.log(e)
+	//console.log(e)
 	filterReturnable.push(filter.filterin.value)
     db.collection('Filters').doc('current').update({
         current: JSON.stringify(filterReturnable),
@@ -338,7 +488,7 @@ var id = 8374568345383847
 
 bias.addEventListener('submit', (e) => {
     e.preventDefault();
-	console.log(e)
+	//console.log(e)
 
 	biasReturnable.push(bias.biasin.value)
     db.collection('Biases').doc('current').update({
@@ -349,7 +499,7 @@ bias.addEventListener('submit', (e) => {
 });
 filter.addEventListener('submit', (e) => {
     e.preventDefault();
-	console.log(e)
+	//console.log(e)
 	filterReturnable.push(filter.filterin.value)
     db.collection('Filters').doc('current').update({
         current: JSON.stringify(filterReturnable),
@@ -359,9 +509,9 @@ filter.addEventListener('submit', (e) => {
 });
 attractions.addEventListener('submit', (e) => {
     e.preventDefault();
-    console.log(attractions)
-	console.log(attractions.subtitle)
-    console.log(attractions.subtitle.value)
+    //console.log(attractions)
+	//console.log(attractions.subtitle)
+    //console.log(attractions.subtitle.value)
 
     id = id + Math.floor(Math.random() * 100000000);
     var temp =   {
@@ -379,7 +529,7 @@ attractions.addEventListener('submit', (e) => {
         },
       }
       attractionsReturnable.push(temp)
-      console.log(attractionsReturnable)
+      //console.log(attractionsReturnable)
     db.collection('Custom').doc('current').update({
         current: JSON.stringify(attractionsReturnable),
     });

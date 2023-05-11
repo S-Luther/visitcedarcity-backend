@@ -1,6 +1,9 @@
+// @ts-nocheck
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import * as puppeteer from 'puppeteer';
+import fetch from 'node-fetch';
+
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
 //
@@ -14,7 +17,7 @@ admin.initializeApp();
 export const BrianHeadMountainDataPropogater = functions
     .runWith({ timeoutSeconds: 60, memory: "1GB" })
     .pubsub
-    .schedule('every 24 hours').onRun(async context => {  
+    .schedule('every 4 hours').onRun(async context => {  
     
         functions.logger.info("Hello logs!", {structuredData: true});
 
@@ -23,47 +26,82 @@ export const BrianHeadMountainDataPropogater = functions
             const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
             const page = await browser.newPage();
             await page.goto(url);
-            await page.waitFor(5000);
+            await page.waitForTimeout(5000);
+            let baseDepthText, onedaySnowfallText, liftsOpenText, trailsOpenText, tempText, conditionsText, windText
 
+            let inseason = false
 
-            const baseDepth = await page.$(".w153_acf_option_bh_snr_snow_basedepth");
-            const baseDepthText = await page.evaluate(element => element.textContent, baseDepth);
-            functions.logger.info("Base Depth: "+baseDepthText, {structuredData: true});
+            try {
+                const baseDepth = await page.$(".w153_acf_option_bh_snr_snow_basedepth");
+                baseDepthText = await page.evaluate(element => element.textContent, baseDepth);
+                functions.logger.info("Base Depth: "+baseDepthText, {structuredData: true});
+    
+                const onedaySnowfall = await page.$(".w1-number.w153_acf_option_bh_snr_snow_24hour");
+                onedaySnowfallText = await page.evaluate(element => element.textContent, onedaySnowfall);
+                functions.logger.info("24hr Snowfall: "+onedaySnowfallText, {structuredData: true});
+    
+                const liftsOpen = await page.$(".w1-number.w153_acf_option_bh_snr_lifts_open");
+                liftsOpenText = await page.evaluate(element => element.textContent, liftsOpen);
+                functions.logger.info("Lifts Open: "+liftsOpenText, {structuredData: true});
+    
+                const trailsOpen = await page.$(".w1-number.w153_acf_option_bh_snr_trails_open");
+                trailsOpenText = await page.evaluate(element => element.textContent, trailsOpen);
+                functions.logger.info("Trails Open: "+trailsOpenText, {structuredData: true});
+    
+                const temp = await page.$(".w153_pl_bh_option_weather_temperature");
+                tempText = await page.evaluate(element => element.textContent, temp);
+                functions.logger.info("Brian Head Temp: "+tempText, {structuredData: true});
+    
+                const conditions = await page.$(".w153_pl_bh_option_weather_shortForecast");
+                conditionsText = await page.evaluate(element => element.textContent, conditions);
+                functions.logger.info("Brian Head Conditions: "+conditionsText, {structuredData: true});
+    
+                const wind = await page.$(".w1-line2.w153_pl_bh_option_weather_wind");
+                windText = await page.evaluate(element => element.textContent, wind);
+                functions.logger.info("Brian Head Wind: "+windText, {structuredData: true});
+                inseason = true
+            } catch (error) {
+                baseDepthText = "NaN";
+                functions.logger.info("Base Depth: "+baseDepthText, {structuredData: true});
+    
+                onedaySnowfallText = "NaN"
+                functions.logger.info("24hr Snowfall: "+onedaySnowfallText, {structuredData: true});
+    
+                const liftsOpen = await page.$(".w1-number.w153_acf_option_bh_snr_lifts_open");
+                liftsOpenText = await page.evaluate(element => element.textContent, liftsOpen);
+                functions.logger.info("Lifts Open: "+liftsOpenText, {structuredData: true});
+    
+                const trailsOpen = await page.$(".w1-number.w153_acf_option_bh_snr_trails_open");
+                trailsOpenText = await page.evaluate(element => element.textContent, trailsOpen);
+                functions.logger.info("Trails Open: "+trailsOpenText, {structuredData: true});
+    
+                const temp = await page.$(".w153_pl_bh_option_weather_temperature");
+                tempText = await page.evaluate(element => element.textContent, temp);
+                functions.logger.info("Brian Head Temp: "+tempText, {structuredData: true});
+    
+                const conditions = await page.$(".w153_pl_bh_option_weather_shortForecast");
+                conditionsText = await page.evaluate(element => element.textContent, conditions);
+                functions.logger.info("Brian Head Conditions: "+conditionsText, {structuredData: true});
+    
+                const wind = await page.$(".w1-line2.w153_pl_bh_option_weather_wind");
+                windText = await page.evaluate(element => element.textContent, wind);
+                functions.logger.info("Brian Head Wind: "+windText, {structuredData: true});
+                inseason = false
 
-            const onedaySnowfall = await page.$(".w1-number.w153_acf_option_bh_snr_snow_24hour");
-            const onedaySnowfallText = await page.evaluate(element => element.textContent, onedaySnowfall);
-            functions.logger.info("24hr Snowfall: "+onedaySnowfallText, {structuredData: true});
+            }
 
-            const liftsOpen = await page.$(".w1-number.w153_acf_option_bh_snr_lifts_open");
-            const liftsOpenText = await page.evaluate(element => element.textContent, liftsOpen);
-            functions.logger.info("Lifts Open: "+liftsOpenText, {structuredData: true});
-
-            const trailsOpen = await page.$(".w1-number.w153_acf_option_bh_snr_trails_open");
-            const trailsOpenText = await page.evaluate(element => element.textContent, trailsOpen);
-            functions.logger.info("Trails Open: "+trailsOpenText, {structuredData: true});
-
-            const temp = await page.$(".w153_pl_bh_option_weather_temperature");
-            const tempText = await page.evaluate(element => element.textContent, temp);
-            functions.logger.info("Brian Head Temp: "+tempText, {structuredData: true});
-
-            const conditions = await page.$(".w153_pl_bh_option_weather_shortForecast");
-            const conditionsText = await page.evaluate(element => element.textContent, conditions);
-            functions.logger.info("Brian Head Conditions: "+conditionsText, {structuredData: true});
-
-            const wind = await page.$(".w1-line2.w153_pl_bh_option_weather_wind");
-            const windText = await page.evaluate(element => element.textContent, wind);
-            functions.logger.info("Brian Head Wind: "+windText, {structuredData: true});
-
-            await admin.firestore().collection('mountainData').add({
-                Date: new Date(),
-                baseDepth: baseDepthText,
-                onedaySnowfall: onedaySnowfallText,
-                liftsOpen: liftsOpenText,
-                trailsOpen: trailsOpenText,
-                temp: tempText,
-                conditions: conditionsText,
-                wind: windText,
-            })
+            if(inseason){
+                await admin.firestore().collection('mountainData').add({
+                    Date: new Date(),
+                    baseDepth: baseDepthText,
+                    onedaySnowfall: onedaySnowfallText,
+                    liftsOpen: liftsOpenText,
+                    trailsOpen: trailsOpenText,
+                    temp: tempText,
+                    conditions: conditionsText,
+                    wind: windText,
+                })
+            }
 
             await admin.firestore().collection('mountainData').doc("current").update({
                 Date: new Date(),
@@ -89,7 +127,7 @@ async function getWeather(url: string, name: string){
     const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
     const page = await browser.newPage();
     await page.goto(url);
-    await page.waitFor(5000);
+    await page.waitForTimeout(5000);
 
 
     const temp = await page.$(".city-temp");
@@ -101,11 +139,11 @@ async function getWeather(url: string, name: string){
     functions.logger.info("Conditions: "+conditionsText, {structuredData: true});
 
 
-    await admin.firestore().collection(name+'WeatherDayData').add({
-        Date: new Date(),
-        temp: tempText,
-        conditions: conditionsText,
-    })
+    // await admin.firestore().collection(name+'WeatherDayData').add({
+    //     Date: new Date(),
+    //     temp: tempText,
+    //     conditions: conditionsText,
+    // })
 
     await admin.firestore().collection(name+'WeatherDayData').doc("current").update({
         Date: new Date(),
@@ -123,7 +161,7 @@ async function getWeather(url: string, name: string){
 export const WeatherDataPropogater = functions
     .runWith({ timeoutSeconds: 60, memory: "1GB" })
     .pubsub
-    .schedule('every 1 hours').onRun(async context => {  
+    .schedule('every 30 minutes').onRun(async context => {  
     
         functions.logger.info("Hello logs!", {structuredData: true});
 
@@ -147,7 +185,7 @@ export const pubsubtest = functions
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('http://511.commuterlink.utah.gov/tats.web.report/')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         const Cedar = await page.$("#GridInterstates_ctl00__19");
         const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
@@ -195,14 +233,14 @@ export const pubsubtest = functions
 export const experiences = functions
     .runWith({ timeoutSeconds: 60, memory: "1GB" })
     .pubsub
-    .schedule('every 3 hours').onRun(async context => {  
+    .schedule('every 10 minutes').onRun(async context => {  
 
         functions.logger.info("Hello logs!", {structuredData: true});
 
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('https://visitcedarcity.com/blog/#blog-posts')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         // const Cedar = await page.$("#GridInterstates_ctl00__19");
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
@@ -223,44 +261,42 @@ export const experiences = functions
             id++;
             returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \"Looking for an idea of what to do in Cedar City?\",\"image\": \""+image+"\",       \"categories\": [] },"
             // LongValText
-
+            await admin.firestore().collection('Experiences').doc("current").update({
+                current: returnable,
+            })
 
 
         })
 
-        await page.goto('https://visitcedarcity.com/')
-        await page.waitFor(5000);
+        // await page.goto('https://visitcedarcity.com/')
+        // await page.waitForTimeout(5000);
 
 
-        const instHandleArray = await page.$$('.sbi_photo_wrap')
+        // const instHandleArray = await page.$$('.sbi_photo_wrap')
 
-        await instHandleArray.map(async el => {
-            const LongValText = await page.evaluate(element => element.innerHTML, el); 
-            const data = LongValText.split('"')
+        // await instHandleArray.map(async el => {
+        //     const LongValText = await page.evaluate(element => element.innerHTML, el); 
+        //     const data = LongValText.split('"')
 
-            functions.logger.info(data, {structuredData: true});
-            const title = "Connect with us"
-            const url = data[3]
-            const image = data[9]
-            let test = data[19].replace(/(\r\n|\n|\r)/gm, "")
+        //     functions.logger.info(data, {structuredData: true});
+        //     const title = "Connect with us"
+        //     const url = data[3]
+        //     const image = data[9]
+        //     let test = "Connect with us on social media and see more of what you can experience in Cedar City!"
             
 
-            if(test === "true" || test === true){
-                test = data[41].replace(/(\r\n|\n|\r)/gm, "")
-            }
+        //     functions.logger.info(test, {structuredData: true});
+        //     id++;
+        //     returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \""+test+"\",\"image\": \""+image+"\",       \"categories\": [] },"
+        //     // LongValText
 
-            functions.logger.info(test, {structuredData: true});
-            id++;
-            returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \""+test+"\",\"image\": \""+image+"\",       \"categories\": [] },"
-            // LongValText
-
-            // functions.logger.info(returnable, {structuredData: true});
-                await admin.firestore().collection('Experiences').doc("current").update({
-                    current: returnable,
-                })
+        //     // functions.logger.info(returnable, {structuredData: true});
+        //         await admin.firestore().collection('Experiences').doc("current").update({
+        //             current: returnable,
+        //         })
             
 
-        })
+        // })
     
     
     
@@ -281,7 +317,7 @@ export const foodsanddrinks = functions
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('https://visitcedarcity.com/food-drink/')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         // const Cedar = await page.$("#GridInterstates_ctl00__19");
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
@@ -326,7 +362,6 @@ export const foodsanddrinks = functions
 
 
 });
-
 export const lodging = functions
     .runWith({ timeoutSeconds: 20, memory: "1GB" })
     .pubsub
@@ -337,7 +372,7 @@ export const lodging = functions
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('https://visitcedarcity.com/lodging/')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         // const Cedar = await page.$("#GridInterstates_ctl00__19");
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
@@ -382,3 +417,281 @@ export const lodging = functions
 
 
 });
+
+async function getCCSched(){
+    let returnable = "{\"schedule\": ["
+        var id = 1000;
+        const thefetch = await fetch('https://visitcedarcity.com/wp-json/solid/v1/events?per_page=50&page=1', {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(async data => {
+            // console.log(data.toString().includes("Art Festival"))
+            // console.log(data)
+            const date = new Date()
+            date.setDate(date.getDate() - 1);
+
+            data.events.event.forEach((element: any) => {
+                
+                if(!(new Date(element.startdate).getTime()<date.getTime())){
+                    // console.log(element)
+                    id++;
+                    returnable = returnable + "{"
+                    returnable = returnable + "\"date\": \""+new Date(element.startdate).toISOString().slice(0, 10)+"\","
+                
+                    returnable = returnable + "\"groups\": [{ \"time\": \"" + new Date(element.startdate).toLocaleTimeString("en-US")+"\","
+                    let name = element.title
+                    if(name.includes('"')){
+                        name = "Check out this event on our Online Calendar"
+                        // name.replaceAll("\"","")
+                        // console.log(name)
+
+                    }
+
+                    var punctuationless = name.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+                    var finalString = punctuationless.replace(/\s{2,}/g," ");
+                    var urlString = finalString.split(' ').join('-');
+
+                    returnable = returnable + "\"sessions\": [ {\"name\": \""+name+"\","
+                
+                    returnable = returnable + "\"url\": \"https://visitcedarcity.com/events/"+urlString+"/\",\"timeStart\": \""+element.starttime+"\","
+                
+                    returnable = returnable + "\"timeEnd\": \""+element.endtime+"\","
+                    returnable = returnable + "\"location\": \""+element.location+"\","
+                
+                    returnable = returnable + "\"tracks\": [\"General Events\"],\"id\": \""+id+"\"}]}]},"
+                }
+            });
+            returnable = returnable
+            await admin.firestore().collection('Schedules').doc("CC").update({
+                Date: new Date(),
+                current: returnable,
+            })
+            return returnable;
+        })
+}
+async function getBHSched(){
+    let returnable = "{\"schedule\": ["
+        var id = 2000;
+        let thefetch = await fetch('https://tockify.com/api/ngevent?max=-1&view=upcoming&calname=brianheadeventsmonthly&max-events-after=12&showAll=false&debug=loaded&passback=2022%3A3%3A0&startms='+new Date().getTime()+'&start-inclusive=true&end-inclusive=true&endms=9651384800000', {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(async data => {
+            // console.log(data.toString().includes("Art Festival"))
+            // console.log(data)
+            data.events.forEach((el: any) => {
+
+                let name = el.content.summary.text
+                if(name.includes('"')){
+                    name = "Check out this event on our Online Calendar"
+                    // name.replaceAll("\"","")
+                    // console.log(name)
+
+                }
+                
+                id++;
+                returnable = returnable + "{"
+                returnable = returnable + "\"date\": \""+new Date(el.when.start.millis).toISOString().slice(0, 10)+"\","
+            
+                returnable = returnable + "\"groups\": [{ \"time\": \"" + new Date(el.when.start.millis).toLocaleTimeString("en-US")+"\","
+            
+                returnable = returnable + "\"sessions\": [ {\"name\": \""+name+"\","
+            
+                returnable = returnable + "\"url\": \"https://brianhead.com\",\"timeStart\": \""+new Date(el.when.start.millis).toLocaleTimeString("en-US")+"\","
+            
+                returnable = returnable + "\"timeEnd\": \""+new Date(el.when.end.millis).toLocaleTimeString("en-US")+"\","
+                returnable = returnable + "\"location\": \""+(JSON.stringify(el.content.location) ? el.content.location.name : "Brian Head Resort")+"\","
+            
+                returnable = returnable + "\"tracks\": [\"Brian Head\"],\"id\": \""+id+"\"}]}]},"
+            });
+            returnable = returnable
+            await admin.firestore().collection('Schedules').doc("BH").update({
+                Date: new Date(),
+                current: returnable,
+            })
+            return returnable;
+    });
+}
+
+async function getSUMASched(){
+    let returnable = "{\"schedule\": ["
+    var id = 2000;
+    let thefetch = await fetch('https://www.googleapis.com/calendar/v3/calendars/suu.edu_hohm4a339kc7qpj79jnhfom0pc@group.calendar.google.com/events?key=AIzaSyBLJiGeQHA3cHNh0UGWNqJiotLKQOId6J0&timeMin='+new Date().toISOString().slice(0, -5)+'-06:00&maxResults=30&orderBy=startTime&singleEvents=true&q=', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(async data => {
+        // console.log(data.toString().includes("Art Festival"))
+        // console.log(data)
+        data.items.forEach((el: any) => {
+            // console.log(el)
+            // let newdate = el.start.dateTime.slice(0, -6)+".000Z"
+            // console.log(newdate)
+            
+            id++;
+
+            returnable = returnable + "{"
+            try {
+                new Date(el.start.dateTime)
+                returnable = returnable + "\"date\": \""+new Date(el.start.dateTime).toISOString().slice(0, 10)+"\","
+        
+                returnable = returnable + "\"groups\": [{ \"time\": \"" + new Date(el.start.dateTime).toLocaleTimeString("en-US")+"\","
+            
+                returnable = returnable + "\"sessions\": [ {\"name\": \""+el.summary+"\","
+            
+                returnable = returnable + "\"url\": \"https://www.suu.edu/suma/events.html\",\"timeStart\": \""+new Date(el.start.dateTime).toLocaleTimeString("en-US")+"\","
+            
+                returnable = returnable + "\"timeEnd\": \""+new Date(el.end.dateTime).toLocaleTimeString("en-US")+"\","
+            } catch (error) {
+                returnable = returnable + "\"date\": \""+new Date(el.start.date).toISOString().slice(0, 10)+"\","
+        
+                returnable = returnable + "\"groups\": [{ \"time\": \"" + new Date(el.start.date).toLocaleTimeString("en-US")+"\","
+            
+                returnable = returnable + "\"sessions\": [ {\"name\": \""+el.summary+"\","
+            
+                returnable = returnable + "\"url\": \"https://www.suu.edu/suma/events.html\",\"timeStart\": \""+new Date(el.start.date).toLocaleTimeString("en-US")+"\","
+            
+                returnable = returnable + "\"timeEnd\": \""+new Date(el.end.date).toLocaleTimeString("en-US")+"\","
+            }
+            returnable = returnable + "\"location\": \""+"SUMA"+"\","
+        
+            returnable = returnable + "\"tracks\": [\"SUMA\"],\"id\": \""+id+"\"}]}]},"
+            // localStorage.setItem("SUMAScheduleUpdate", returnable)
+        });
+        returnable = returnable
+        await admin.firestore().collection('Schedules').doc("SUMA").update({
+            Date: new Date(),
+            current: returnable,
+        })
+        return returnable;
+
+    
+});
+}
+
+async function getCBSched() {
+    let returnable = "{\"schedule\": ["
+        var id = 3000;
+        let thefetch = await fetch('https://www.nps.gov/cebr/nps-alerts-cebr.json?dt='+new Date().getTime(), {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(async data => {
+            // console.log(data.toString().includes("Art Festival"))
+            // console.log(data)
+            data.CEDATA.forEach((el: any) => {
+                // console.log(el)
+                // let newdate = el.start.dateTime.slice(0, -6)+".000Z"
+                // console.log(newdate)
+                
+                id++;
+
+                returnable = returnable + "{"
+
+                    returnable = returnable + "\"date\": \""+new Date().toISOString().slice(0, 10)+"\","
+            
+                    returnable = returnable + "\"groups\": [{ \"time\": \"\","
+                
+                    returnable = returnable + "\"sessions\": [ {\"name\": \""+el.FIC_title+"\","
+                
+                    returnable = returnable + "\"url\": \"https://www.nps.gov/cebr/\",\"timeStart\": \"\","
+                
+                    returnable = returnable + "\"timeEnd\": \"\","
+                returnable = returnable + "\"location\": \""+"Cedar Breaks National Monument"+"\","
+            
+                returnable = returnable + "\"tracks\": [\"Cedar Breaks National Monument\"],\"id\": \""+id+"\"}]}]},"
+                // localStorage.setItem("CBAlertUpdate", returnable)
+            });
+            returnable = returnable
+            await admin.firestore().collection('Schedules').doc("CB").update({
+                Date: new Date(),
+                current: returnable,
+            })
+            return returnable;
+
+        
+    });
+}
+
+async function getSUUPSched(){
+    let returnable = "{\"schedule\": ["
+        var id = 3000;
+        let thefetch = await fetch('https://clients6.google.com/calendar/v3/calendars/c_og7r6jfj5to87olvbqc3he6v18@group.calendar.google.com/events?calendarId=c_og7r6jfj5to87olvbqc3he6v18%40group.calendar.google.com&singleEvents=true&timeZone=America%2FDenver&maxAttendees=1&maxResults=250&sanitizeHtml=true&timeMin=2022-09-25T00%3A00%3A00-06%3A00&timeMax=2032-11-06T00%3A00%3A00-06%3A00&key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs', {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(async data => {
+            // console.log(data.toString().includes("Art Festival"))
+            // console.log(data)
+            data.items.forEach((el: any) => {
+                // console.log(el)
+                // let newdate = el.start.dateTime.slice(0, -6)+".000Z"
+                //console.log(el.summary, new Date(el.start.dateTime.slice(0, -15)).toISOString().slice(0, 10))
+                
+                id++;
+
+                returnable = returnable + "{"
+
+                    returnable = returnable + "\"date\": \""+new Date(el.start.dateTime.slice(0, -15)).toISOString().slice(0, 10)+"\","
+            
+                    returnable = returnable + "\"groups\": [{ \"time\": \"" + new Date(el.start.dateTime).toLocaleTimeString("en-US")+"\","
+                
+                    returnable = returnable + "\"sessions\": [ {\"name\": \""+el.summary+"\","
+                
+                    returnable = returnable + "\"url\": \"https://www.suu.edu/pva/\",\"timeStart\": \""+new Date(el.start.dateTime).toLocaleTimeString("en-US")+"\","
+                
+                    returnable = returnable + "\"timeEnd\": \""+new Date(el.end.dateTime).toLocaleTimeString("en-US")+"\","
+                returnable = returnable + "\"location\": \""+el.location+"\","
+            
+                returnable = returnable + "\"tracks\": [\"SUU Performing Arts\"],\"id\": \""+id+"\"}]}]},"
+                // localStorage.setItem("SUUPUpdate", returnable)
+            });
+            returnable = returnable
+            await admin.firestore().collection('Schedules').doc("SUUP").update({
+                Date: new Date(),
+                current: returnable,
+            })
+            return returnable;
+            
+
+    });
+}
+
+
+export const ScheduleUpdates = functions
+    .runWith({ timeoutSeconds: 60, memory: "1GB" })
+    .pubsub
+    .schedule('every 30 minutes').onRun(async context => {  
+    
+        functions.logger.info("Hello logs!", {structuredData: true});
+
+
+        let CC = await getCCSched();
+        let BH = await getBHSched();
+        let CB = await getCBSched();
+        let SUMA = await getSUMASched();
+        let SUUP = await getSUUPSched();
+
+        // await admin.firestore().collection('Schedules').doc("current").update({
+        //     Date: new Date(),
+
+        // })
+     
+
+    });
