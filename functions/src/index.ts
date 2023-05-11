@@ -449,9 +449,13 @@ async function getCCSched(){
 
                     }
 
+                    var punctuationless = name.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+                    var finalString = punctuationless.replace(/\s{2,}/g," ");
+                    var urlString = finalString.split(' ').join('-');
+
                     returnable = returnable + "\"sessions\": [ {\"name\": \""+name+"\","
                 
-                    returnable = returnable + "\"url\": \"https://visitcedarcity.com/event-details/?eid="+element.eventid+"\",\"timeStart\": \""+element.starttime+"\","
+                    returnable = returnable + "\"url\": \"https://visitcedarcity.com/events/"+urlString+"/\",\"timeStart\": \""+element.starttime+"\","
                 
                     returnable = returnable + "\"timeEnd\": \""+element.endtime+"\","
                     returnable = returnable + "\"location\": \""+element.location+"\","
@@ -623,7 +627,7 @@ async function getCBSched() {
 async function getSUUPSched(){
     let returnable = "{\"schedule\": ["
         var id = 3000;
-        let thefetch = await fetch('https://clients6.google.com/calendar/v3/calendars/c_og7r6jfj5to87olvbqc3he6v18@group.calendar.google.com/events?calendarId=c_og7r6jfj5to87olvbqc3he6v18%40group.calendar.google.com&singleEvents=true&timeZone=America%2FDenver&maxAttendees=1&maxResults=250&sanitizeHtml=true&timeMin=2022-03-27T00%3A00%3A00-06%3A00&timeMax=2025-05-01T00%3A00%3A00-06%3A00&key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs', {
+        let thefetch = await fetch('https://clients6.google.com/calendar/v3/calendars/c_og7r6jfj5to87olvbqc3he6v18@group.calendar.google.com/events?calendarId=c_og7r6jfj5to87olvbqc3he6v18%40group.calendar.google.com&singleEvents=true&timeZone=America%2FDenver&maxAttendees=1&maxResults=250&sanitizeHtml=true&timeMin=2022-09-25T00%3A00%3A00-06%3A00&timeMax=2032-11-06T00%3A00%3A00-06%3A00&key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs', {
             method: 'GET',
             headers: {
               Accept: 'application/json',
