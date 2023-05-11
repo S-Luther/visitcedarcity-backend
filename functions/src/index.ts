@@ -26,7 +26,7 @@ export const BrianHeadMountainDataPropogater = functions
             const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
             const page = await browser.newPage();
             await page.goto(url);
-            await page.waitFor(5000);
+            await page.waitForTimeout(5000);
             let baseDepthText, onedaySnowfallText, liftsOpenText, trailsOpenText, tempText, conditionsText, windText
 
             let inseason = false
@@ -127,7 +127,7 @@ async function getWeather(url: string, name: string){
     const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
     const page = await browser.newPage();
     await page.goto(url);
-    await page.waitFor(5000);
+    await page.waitForTimeout(5000);
 
 
     const temp = await page.$(".city-temp");
@@ -185,7 +185,7 @@ export const pubsubtest = functions
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('http://511.commuterlink.utah.gov/tats.web.report/')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         const Cedar = await page.$("#GridInterstates_ctl00__19");
         const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
@@ -233,14 +233,14 @@ export const pubsubtest = functions
 export const experiences = functions
     .runWith({ timeoutSeconds: 60, memory: "1GB" })
     .pubsub
-    .schedule('every 3 hours').onRun(async context => {  
+    .schedule('every 10 minutes').onRun(async context => {  
 
         functions.logger.info("Hello logs!", {structuredData: true});
 
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('https://visitcedarcity.com/blog/#blog-posts')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         // const Cedar = await page.$("#GridInterstates_ctl00__19");
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
@@ -261,44 +261,42 @@ export const experiences = functions
             id++;
             returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \"Looking for an idea of what to do in Cedar City?\",\"image\": \""+image+"\",       \"categories\": [] },"
             // LongValText
-
+            await admin.firestore().collection('Experiences').doc("current").update({
+                current: returnable,
+            })
 
 
         })
 
-        await page.goto('https://visitcedarcity.com/')
-        await page.waitFor(5000);
+        // await page.goto('https://visitcedarcity.com/')
+        // await page.waitForTimeout(5000);
 
 
-        const instHandleArray = await page.$$('.sbi_photo_wrap')
+        // const instHandleArray = await page.$$('.sbi_photo_wrap')
 
-        await instHandleArray.map(async el => {
-            const LongValText = await page.evaluate(element => element.innerHTML, el); 
-            const data = LongValText.split('"')
+        // await instHandleArray.map(async el => {
+        //     const LongValText = await page.evaluate(element => element.innerHTML, el); 
+        //     const data = LongValText.split('"')
 
-            functions.logger.info(data, {structuredData: true});
-            const title = "Connect with us"
-            const url = data[3]
-            const image = data[9]
-            let test = data[19].replace(/(\r\n|\n|\r)/gm, "")
+        //     functions.logger.info(data, {structuredData: true});
+        //     const title = "Connect with us"
+        //     const url = data[3]
+        //     const image = data[9]
+        //     let test = "Connect with us on social media and see more of what you can experience in Cedar City!"
             
 
-            if(test === "true" || test === true){
-                test = data[41].replace(/(\r\n|\n|\r)/gm, "")
-            }
+        //     functions.logger.info(test, {structuredData: true});
+        //     id++;
+        //     returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \""+test+"\",\"image\": \""+image+"\",       \"categories\": [] },"
+        //     // LongValText
 
-            functions.logger.info(test, {structuredData: true});
-            id++;
-            returnable = returnable + "{\"id\": "+id+",\"title\": \""+title+"\",\"subtitle\": \"Experiences\",\"url\": \""+url+"\",\"description\": \""+test+"\",\"image\": \""+image+"\",       \"categories\": [] },"
-            // LongValText
-
-            // functions.logger.info(returnable, {structuredData: true});
-                await admin.firestore().collection('Experiences').doc("current").update({
-                    current: returnable,
-                })
+        //     // functions.logger.info(returnable, {structuredData: true});
+        //         await admin.firestore().collection('Experiences').doc("current").update({
+        //             current: returnable,
+        //         })
             
 
-        })
+        // })
     
     
     
@@ -319,7 +317,7 @@ export const foodsanddrinks = functions
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('https://visitcedarcity.com/food-drink/')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         // const Cedar = await page.$("#GridInterstates_ctl00__19");
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
@@ -372,7 +370,7 @@ export const lodging = functions
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
         const page = await browser.newPage();
         await page.goto('https://visitcedarcity.com/lodging/')
-        await page.waitFor(5000);
+        await page.waitForTimeout(5000);
 
         // const Cedar = await page.$("#GridInterstates_ctl00__19");
         // const CedarText = await page.evaluate(element => element.innerHTML, Cedar);
